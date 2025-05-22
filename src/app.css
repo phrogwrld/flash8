@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+@layer base {
+	body {
+		@apply text-zinc-900;
+	}
+
+	.dark {
+		body {
+			@apply text-zinc-300;
+		}
+	}
+}
