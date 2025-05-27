@@ -3,7 +3,7 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import { Storage } from '@google-cloud/storage';
 
 const storage = new Storage();
-const BUCKET_NAME = 'appscript_gcs_sync'; // Your bucket name
+const BUCKET_NAME = 'raw-data-sandbox';
 
 export const GET: RequestHandler = async () => {
 	try {

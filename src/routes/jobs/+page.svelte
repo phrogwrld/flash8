@@ -46,26 +46,18 @@
 		}
 	}
 
-	async function downloadFile(fileId: string, fileName: string) {
+	async function downloadFile(fileId: string) {
 		try {
-			const response = await fetch(`/api/files/${fileId}/download`);
+			const link = document.createElement('a');
+			link.href = `/api/files/${fileId}/download`;
+			link.target = '_blank';
+			link.rel = 'noopener';
 
-			if (!response.ok) {
-				throw new Error('Download failed');
-			}
-
-			const blob = await response.blob();
-			const url = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = fileName;
-			document.body.appendChild(a);
-			a.click();
-			window.URL.revokeObjectURL(url);
-			document.body.removeChild(a);
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
 		} catch (err) {
-			console.error('Download error:', err);
-			// You could show a toast notification here
+			console.error('Download failed:', err);
 		}
 	}
 
@@ -174,7 +166,7 @@
 						{#if file.status.toLowerCase() === 'completed'}
 							<button
 								class="rounded-md bg-zinc-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors duration-150 hover:bg-zinc-600 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none dark:bg-zinc-600 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800"
-								onclick={() => downloadFile(file.id, file.name)}
+								onclick={() => downloadFile(file.id)}
 							>
 								Download
 							</button>
