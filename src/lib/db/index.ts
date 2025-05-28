@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { Pool } from 'pg';
 import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
+import { getConfig } from './config';
 
 let pool: Pool | null = null;
 
@@ -22,6 +23,15 @@ async function getPool(): Promise<Pool> {
 	}
 	return pool;
 }
+
+async function main() {
+  const apiKey = await getConfig('MY_API_KEY');
+  const apiUrl = await getConfig('MY_API_URL');
+  // … use apiKey/apiUrl, but never log them in prod
+  console.log('Starting up…');  // no secrets here!
+}
+
+main().catch(console.error);
 
 export class VTTFileService {}
 
