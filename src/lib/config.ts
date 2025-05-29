@@ -1,5 +1,5 @@
-// src/config.ts
-/*import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
+
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -20,4 +20,4 @@ export async function getConfig(key: string): Promise<string> {
     return val;
   }
   return fetchSecret(key);
-}*/
+}
