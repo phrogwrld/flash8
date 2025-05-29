@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { Pool } from 'pg';
 import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
-import { getConfig } from './config';
+//import { getConfig } from './config';
 
 let pool: Pool | null = null;
 
@@ -24,7 +24,7 @@ async function getPool(): Promise<Pool> {
 	return pool;
 }
 
-async function main() {
+/*async function main() {
   const apiKey = await getConfig('MY_API_KEY');
   const apiUrl = await getConfig('MY_API_URL');
   const instanceConnectionName = await getConfig('My_INSTANCE_NAME')
@@ -32,7 +32,7 @@ async function main() {
   console.log('Starting up…');  // no secrets here!
 }
 
-main().catch(console.error);
+main().catch(console.error);*/
 
 export class VTTFileService {}
 
