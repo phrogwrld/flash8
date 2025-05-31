@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import JobSkeleton from '$lib/components/JobSkeleton.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { Toasts } from '$lib/state/toasts.svelte';
 	import { formatDate } from '$lib/utils';
@@ -170,43 +171,101 @@
 			{/if}
 
 			{#if isLoading}
-				<div class="flex justify-center py-8">
-					<svg
-						class="h-8 w-8 animate-spin text-zinc-500 dark:text-zinc-400"
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path
-							class="opacity-75"
-							fill="currentColor"
-							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-					</svg>
-				</div>
+				<JobSkeleton />
 			{:else if files.length === 0}
 				<div class="py-12 text-center">
-					<svg
-						class="mx-auto h-12 w-12 text-zinc-400 dark:text-zinc-500"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-						/>
-					</svg>
-					<p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No files uploaded yet</p>
-					<button
-						class="mt-2 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+					<div class="mx-auto w-80 max-w-md">
+						<div class="relative">
+							<div
+								class="absolute top-6 right-4 left-4 flex items-center justify-between rounded-xl border border-zinc-200/60 bg-white/60 p-4 shadow-sm backdrop-blur-sm dark:border-zinc-700/60 dark:bg-zinc-800/60"
+							>
+								<div class="flex items-center space-x-3">
+									<div class="h-8 w-8 rounded bg-zinc-200/80 dark:bg-zinc-700/80"></div>
+									<div class="space-y-1">
+										<div class="h-3 w-16 rounded bg-zinc-200/80 dark:bg-zinc-600/80"></div>
+										<div class="h-2 w-12 rounded bg-zinc-200/80 dark:bg-zinc-600/80"></div>
+									</div>
+								</div>
+								<div class="flex space-x-1">
+									<div class="h-3 w-8 rounded bg-zinc-200/80 dark:bg-zinc-600/80"></div>
+									<div class="h-3 w-6 rounded bg-zinc-200/80 dark:bg-zinc-600/80"></div>
+								</div>
+							</div>
+							<div
+								class="absolute top-3 right-2 left-2 flex items-center justify-between rounded-xl border border-zinc-200/80 bg-white/80 p-4 shadow-md backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-800/80"
+							>
+								<div class="flex items-center space-x-3">
+									<div class="h-8 w-8 rounded bg-zinc-200/90 dark:bg-zinc-700/90"></div>
+									<div class="space-y-1">
+										<div class="h-3 w-20 rounded bg-zinc-200/90 dark:bg-zinc-600/90"></div>
+										<div class="h-2 w-14 rounded bg-zinc-200/90 dark:bg-zinc-600/90"></div>
+									</div>
+								</div>
+								<div class="flex space-x-1">
+									<div class="h-3 w-8 rounded bg-zinc-200/90 dark:bg-zinc-600/90"></div>
+									<div class="h-3 w-6 rounded bg-zinc-200/90 dark:bg-zinc-600/90"></div>
+								</div>
+							</div>
+							<div
+								class="relative z-10 flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-700 dark:bg-zinc-800"
+							>
+								<div class="flex items-center space-x-3">
+									<div class="flex-shrink-0">
+										<svg
+											class="h-8 w-8 text-zinc-500 dark:text-zinc-400"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="1.5"
+												d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+											/>
+										</svg>
+									</div>
+									<div class="space-y-1">
+										<div class="h-3 w-24 animate-pulse rounded bg-zinc-300 dark:bg-zinc-600"></div>
+										<div class="h-2 w-16 animate-pulse rounded bg-zinc-300 dark:bg-zinc-600"></div>
+									</div>
+								</div>
+								<div class="flex space-x-1">
+									<div class="h-3 w-8 animate-pulse rounded bg-zinc-300 dark:bg-zinc-600"></div>
+									<div class="h-3 w-6 animate-pulse rounded bg-zinc-300 dark:bg-zinc-600"></div>
+								</div>
+							</div>
+							<div class="h-12"></div>
+						</div>
+					</div>
+
+					<div class="mt-2 space-y-2">
+						<h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">No files uploaded yet</h3>
+						<p class="text-sm text-zinc-500 dark:text-zinc-400">
+							Upload your first VTT file to get started with processing
+						</p>
+					</div>
+					<Button
+						class="mt-4 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm"
 						onclick={() => (showUploadModal = true)}
 					>
-						Upload your first file
-					</button>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="size-4"
+							><path d="M12 13v8" /><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path
+								d="m8 17 4-4 4 4"
+							/></svg
+						>
+						Upload your first file</Button
+					>
 				</div>
 			{:else}
 				<div class="space-y-3">
@@ -297,7 +356,7 @@
 			/>
 
 			{#if file && !isUploading}
-				<div class="text-sm text-zinc-500 dark:text-zinc-400">
+				<div class="inline-flex gap-x-1.5 text-sm text-zinc-500 dark:text-zinc-400">
 					<span>Selected file: </span>
 					<strong class="block truncate font-medium text-zinc-700 dark:text-zinc-300">{file.name}</strong>
 				</div>
