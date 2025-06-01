@@ -136,19 +136,14 @@
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Upload History</h1>
 		<div class="flex items-center space-x-3">
-			<button
-				class="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800"
+			<Button
+				class="px-4 py-2 text-sm font-semibold"
+				variant="secondary"
 				onclick={loadProcesses}
 				disabled={isLoading}
+				loading={isLoading}>{isLoading ? 'Refreshing...' : 'Refresh'}</Button
 			>
-				{isLoading ? 'Refreshing...' : 'Refresh'}
-			</button>
-			<button
-				class="rounded-md bg-zinc-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-zinc-600 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none dark:bg-zinc-600 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800"
-				onclick={() => (showUploadModal = true)}
-			>
-				Upload
-			</button>
+			<Button class="px-4 py-2 text-sm font-semibold" onclick={() => (showUploadModal = true)}>Upload</Button>
 		</div>
 	</div>
 
@@ -391,20 +386,10 @@
 		{/if}
 
 		<div class="flex space-x-3 pt-2">
-			<button
-				class="flex-1 rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-base font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600 dark:focus:ring-offset-zinc-800"
-				onclick={closeModal}
-				disabled={isUploading}
+			<Button variant="secondary" class="flex-1 px-4 py-2.5" onclick={closeModal} disabled={isUploading}>Cancel</Button>
+			<Button class="flex-1 px-4 py-2.5" onclick={upload} disabled={!file} loading={isUploading}
+				>{isUploading ? 'Uploading...' : 'Upload'}</Button
 			>
-				Cancel
-			</button>
-			<button
-				class="flex-1 rounded-md bg-zinc-700 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-zinc-600 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-zinc-400 dark:bg-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800 dark:disabled:bg-zinc-500"
-				onclick={upload}
-				disabled={isUploading || !file}
-			>
-				{isUploading ? 'Uploading...' : 'Upload'}
-			</button>
 		</div>
 	</div>
 </Modal>

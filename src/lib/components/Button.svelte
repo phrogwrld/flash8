@@ -35,7 +35,7 @@
 <svelte:element
 	this={href ? 'a' : 'button'}
 	class={twMerge(
-		'relative rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800',
+		'relative flex items-center justify-center gap-2 rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800',
 
 		// Variants
 
@@ -52,16 +52,23 @@
 	role={href ? 'link' : 'button'}
 	{...props}
 >
-	{#if loading}{@render IconSpinner()}{/if}
+	{#if loading}
+		{@render IconSpinner()}
+	{/if}
 
-	{@render children?.()}
+	{#if children}
+		<span>
+			{@render children()}
+		</span>
+	{/if}
 </svelte:element>
 
 {#snippet IconSpinner()}
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		class="text-primary absolute right-1/2 bottom-1/2 size-4 translate-x-1/2 translate-y-1/2 animate-spin"
+		class="size-4 animate-spin text-current"
 		viewBox="0 0 16 16"
+		aria-hidden="true"
 	>
 		<path
 			fill="currentColor"
