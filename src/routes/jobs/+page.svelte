@@ -397,8 +397,8 @@
 						></path>
 					</svg>
 				</div>
-				<div class="gap-x-2">
-					Uploading<strong class="font-medium text-zinc-700 dark:text-zinc-300">{file?.name}</strong>...
+				<div>
+					Uploading <strong class="font-medium text-zinc-700 dark:text-zinc-300">{file?.name}</strong>...
 				</div>
 			</div>
 		{/if}
