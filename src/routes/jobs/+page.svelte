@@ -45,21 +45,6 @@
 		}
 	}
 
-	async function downloadFile(fileId: string) {
-		try {
-			const link = document.createElement('a');
-			link.href = `/api/files/${fileId}/download`;
-			link.target = '_blank';
-			link.rel = 'noopener';
-
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		} catch (err) {
-			console.error('Download failed:', err);
-		}
-	}
-
 	async function upload() {
 		uploadMessage = '';
 
@@ -319,7 +304,9 @@
 							<!-- Actions -->
 							<div class="flex items-center space-x-2">
 								{#if process.status.toLowerCase() === 'completed'}
-									<Button variant="primary" onclick={() => downloadFile(process.id)}>Download</Button>
+									<Button variant="primary" href={`/api/files/${process.id}/download`} target="_blank" rel="noopener">
+										Download
+									</Button>
 								{/if}
 								<Button variant="secondary" onclick={() => console.log('View details for', process.id)}>Details</Button>
 							</div>

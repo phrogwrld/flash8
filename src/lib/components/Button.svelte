@@ -1,31 +1,39 @@
 <script lang="ts">
 	import { twMerge } from 'tailwind-merge';
 	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 
 	type Variant = 'primary' | 'secondary';
 
-	type Props = HTMLButtonAttributes & {
+	type BaseProps = {
 		children?: Snippet;
 		class?: string;
+		href?: string;
 		loading?: boolean;
 		disabled?: boolean;
 		variant?: Variant;
 	};
 
+	type AnchorProps = HTMLAnchorAttributes & BaseProps;
+	type ButtonProps = HTMLButtonAttributes & BaseProps;
+
+	type Props<T extends AnchorProps> = T['href'] extends '' | undefined ? ButtonProps : AnchorProps;
+
 	let {
 		children,
 		class: className = '',
+		href,
 		loading = false,
 		disabled = false,
 		variant = 'primary',
-		...restProps
-	}: Props = $props();
+		...props
+	}: Props<AnchorProps> = $props();
 
 	const isDisabled = disabled || loading;
 </script>
 
-<button
+<svelte:element
+	this={href ? 'a' : 'button'}
 	class={twMerge(
 		'relative rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800',
 
@@ -38,14 +46,16 @@
 		className
 	)}
 	disabled={isDisabled}
+	{href}
 	tabindex={isDisabled ? -1 : undefined}
 	aria-disabled={isDisabled ? 'true' : 'false'}
-	{...restProps}
+	role={href ? 'link' : 'button'}
+	{...props}
 >
 	{#if loading}{@render IconSpinner()}{/if}
 
 	{@render children?.()}
-</button>
+</svelte:element>
 
 {#snippet IconSpinner()}
 	<svg
