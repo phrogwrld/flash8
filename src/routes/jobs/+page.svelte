@@ -3,9 +3,9 @@
 	import Button from '$lib/components/Button.svelte';
 	import JobSkeleton from '$lib/components/JobSkeleton.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import TimeAgo from '$lib/components/TimeAgo.svelte';
 	import { FileUploadSchema, type Process } from '$lib/schema';
 	import { Toasts } from '$lib/state/toasts.svelte';
-	import { formatDate, formatFileSize } from '$lib/utils';
 	import { onMount } from 'svelte';
 
 	let processes: Process[] = $state([]);
@@ -296,7 +296,7 @@
 										</Badge>
 									</div>
 									<div class="mt-1 flex items-center space-x-2 text-xs text-zinc-500 dark:text-zinc-400">
-										<span>Created {formatDate(new Date(process.created_at))}</span>
+										<span>Created <TimeAgo timestamp={process.created_at} /></span>
 									</div>
 								</div>
 							</div>
