@@ -3,21 +3,12 @@
 	import Button from '$lib/components/Button.svelte';
 	import JobSkeleton from '$lib/components/JobSkeleton.svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import { FileUploadSchema } from '$lib/schema';
+	import { FileUploadSchema, type Process } from '$lib/schema';
 	import { Toasts } from '$lib/state/toasts.svelte';
-	import { formatDate } from '$lib/utils';
+	import { formatDate, formatFileSize } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	interface VTTFile {
-		id: string;
-		name: string;
-		status: string;
-		outputs: string;
-		created_at: string;
-		updated_at: string;
-	}
-
-	let files: VTTFile[] = $state([]);
+	let processes: Process[] = $state([]);
 	let isLoading = $state(true);
 	let error = $state('');
 
@@ -35,19 +26,20 @@
 
 	const getStatusVariant = (status: string) => statusMap[status.toLowerCase() as keyof typeof statusMap] ?? 'disabled';
 
-	async function loadFiles() {
+	async function loadProcesses() {
 		try {
 			isLoading = true;
 			error = '';
 			const response = await fetch('/api/files');
 
 			if (!response.ok) {
-				throw new Error('Failed to load files');
+				throw new Error('Failed to load processes');
 			}
 
-			files = await response.json();
+			processes = await response.json();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load files';
+			error = err instanceof Error ? err.message : 'Failed to load processes';
+			console.error('Error loading processes:', err);
 		} finally {
 			isLoading = false;
 		}
@@ -118,7 +110,7 @@
 			}
 
 			// Refresh the files list
-			await loadFiles();
+			await loadProcesses();
 
 			// Close modal after a brief delay to show success message
 			setTimeout(() => {
@@ -144,7 +136,7 @@
 	}
 
 	onMount(() => {
-		loadFiles();
+		loadProcesses();
 	});
 </script>
 
@@ -161,7 +153,7 @@
 		<div class="flex items-center space-x-3">
 			<button
 				class="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-200 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800"
-				onclick={loadFiles}
+				onclick={loadProcesses}
 				disabled={isLoading}
 			>
 				{isLoading ? 'Refreshing...' : 'Refresh'}
@@ -189,7 +181,7 @@
 
 			{#if isLoading}
 				<JobSkeleton />
-			{:else if files.length === 0}
+			{:else if processes.length === 0}
 				<div class="py-12 text-center">
 					<div class="mx-auto w-80 max-w-md">
 						<div class="relative">
@@ -286,7 +278,7 @@
 				</div>
 			{:else}
 				<div class="space-y-3">
-					{#each files as file}
+					{#each processes as process}
 						<div
 							class="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 p-4 transition-colors duration-150 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-700/50 dark:hover:bg-zinc-700"
 						>
@@ -312,24 +304,24 @@
 								<div class="min-w-0 flex-1">
 									<div class="flex items-center space-x-2">
 										<p class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-											{file.name}
+											{process.name}
 										</p>
-										<Badge variant={getStatusVariant(file.status)}>
-											{file.status}
+										<Badge variant={getStatusVariant(process.status)}>
+											{process.status}
 										</Badge>
 									</div>
-									<p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-										Uploaded {formatDate(new Date(file.created_at))}
-									</p>
+									<div class="mt-1 flex items-center space-x-2 text-xs text-zinc-500 dark:text-zinc-400">
+										<span>Created {formatDate(new Date(process.created_at))}</span>
+									</div>
 								</div>
 							</div>
 
 							<!-- Actions -->
 							<div class="flex items-center space-x-2">
-								{#if file.status.toLowerCase() === 'completed'}
-									<Button variant="primary" onclick={() => downloadFile(file.id)}>Download</Button>
+								{#if process.status.toLowerCase() === 'completed'}
+									<Button variant="primary" onclick={() => downloadFile(process.id)}>Download</Button>
 								{/if}
-								<Button variant="secondary" onclick={() => console.log('View details for', file.id)}>Details</Button>
+								<Button variant="secondary" onclick={() => console.log('View details for', process.id)}>Details</Button>
 							</div>
 						</div>
 					{/each}

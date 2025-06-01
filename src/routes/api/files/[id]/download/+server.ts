@@ -1,26 +1,26 @@
 import { error, redirect } from '@sveltejs/kit';
-import { vttFiles } from '$lib/db';
+import { processService } from '$lib/db';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const { id } = params;
 
-		const file = await vttFiles.getById(id);
+		const process = await processService.getById(id);
 
-		if (!file) {
+		if (!process) {
 			throw error(404, 'File not found');
 		}
 
-		if (file.status !== 'completed') {
-			throw error(400, `File is not ready for download. Current status: ${file.status}`);
+		if (process.status !== 'completed') {
+			throw error(400, `File is not ready for download. Current status: ${process.status}`);
 		}
 
-		if (!file.outputs) {
+		if (!process.outputs) {
 			throw error(500, 'Download URL not available');
 		}
 
-		throw redirect(302, file.outputs);
+		throw redirect(302, process.outputs);
 	} catch (err) {
 		console.error('Download error:', err);
 
