@@ -3,6 +3,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import JobSkeleton from '$lib/components/JobSkeleton.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import { FileUploadSchema } from '$lib/schema';
 	import { Toasts } from '$lib/state/toasts.svelte';
 	import { formatDate } from '$lib/utils';
 	import { onMount } from 'svelte';
@@ -69,15 +70,27 @@
 
 	async function upload() {
 		uploadMessage = '';
-		if (!file || file.type !== 'text/vtt') {
-			uploadMessage = 'Please select a valid .vtt file';
+
+		const validatedData = FileUploadSchema.safeParse({
+			name: uploadName || undefined,
+			file: file
+		});
+
+		if (!validatedData.success) {
+			const firstError = validatedData.error.issues[0];
+			uploadMessage = firstError?.message || 'Please check your input';
 			return;
 		}
 
 		try {
 			isUploading = true;
 			const formData = new FormData();
-			formData.append('file', file);
+
+			formData.append('file', validatedData.data.file);
+
+			if (validatedData.data.name) {
+				formData.append('name', validatedData.data.name);
+			}
 
 			const response = await fetch('/api/files', {
 				method: 'POST',
@@ -92,10 +105,13 @@
 
 			const result = await response.json();
 			console.log('Upload successful:', result);
+
+			isUploading = false;
 			uploadMessage = 'File uploaded successfully!';
 
-			// Reset form
 			file = null;
+			uploadName = '';
+
 			const fileInputElement = document.getElementById('vtt-file-input') as HTMLInputElement;
 			if (fileInputElement) {
 				fileInputElement.value = '';
@@ -111,8 +127,9 @@
 			}, 1500);
 		} catch (err) {
 			console.error('Upload error:', err);
-		} finally {
-			isUploading = false;
+			if (!uploadMessage) {
+				uploadMessage = 'Upload failed. Please try again.';
+			}
 		}
 	}
 
@@ -388,7 +405,9 @@
 						></path>
 					</svg>
 				</div>
-				Uploading<strong class="font-medium text-zinc-700 dark:text-zinc-300">{file?.name}</strong>...
+				<div class="gap-x-2">
+					Uploading<strong class="font-medium text-zinc-700 dark:text-zinc-300">{file?.name}</strong>...
+				</div>
 			</div>
 		{/if}
 
