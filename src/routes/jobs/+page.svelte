@@ -125,7 +125,7 @@
 
 			Toasts.add({
 				type: 'processing',
-				fileName: result.name
+				fileName: validatedData.data.name
 			});
 
 			// Refresh the files list
