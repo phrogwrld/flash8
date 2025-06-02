@@ -9,7 +9,7 @@ export interface ProcessUpdateEvent {
 }
 
 async function createNotificationClient(): Promise<Client> {
-	const instanceConnectionName = await getConfig('INSTANCE_CONNECTION_NAME');
+	const instanceConnectionName = getConfig('INSTANCE_CONNECTION_NAME');
 	const connector = new Connector();
 	const socketOpts = await connector.getOptions({
 		instanceConnectionName,
@@ -18,9 +18,9 @@ async function createNotificationClient(): Promise<Client> {
 
 	const client = new Client({
 		...socketOpts,
-		user: await getConfig('DB_USER'),
-		password: await getConfig('DB_PASSWORD'),
-		database: await getConfig('DB_NAME')
+		user: getConfig('DB_USER'),
+		password: getConfig('DB_PASSWORD'),
+		database: getConfig('DB_NAME')
 	});
 
 	return client;

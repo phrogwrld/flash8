@@ -5,7 +5,7 @@ import { getConfig } from '$lib/config';
 import type { Process, ProcessStatus } from '$lib/schema';
 
 async function getPool(): Promise<Pool> {
-	const instanceConnectionName = await getConfig('INSTANCE_CONNECTION_NAME');
+	const instanceConnectionName = getConfig('INSTANCE_CONNECTION_NAME');
 
 	const connector = new Connector();
 	const socketOpts = await connector.getOptions({
@@ -16,9 +16,9 @@ async function getPool(): Promise<Pool> {
 
 	const pool = new Pool({
 		...socketOpts,
-		user: await getConfig('DB_USER'),
-		password: await getConfig('DB_PASSWORD'),
-		database: await getConfig('DB_NAME'),
+		user: getConfig('DB_USER'),
+		password: getConfig('DB_PASSWORD'),
+		database: getConfig('DB_NAME'),
 		max: 5
 	});
 	return pool;
