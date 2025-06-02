@@ -6,7 +6,8 @@
 	import TimeAgo from '$lib/components/TimeAgo.svelte';
 	import { FileUploadSchema, type Process } from '$lib/schema';
 	import { Toasts } from '$lib/state/toasts.svelte';
-	import { onMount } from 'svelte';
+	import { processUpdatesStore } from '$lib/stores/process-realtime.svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	let processes: Process[] = $state([]);
 	let isLoading = $state(true);
@@ -37,11 +38,26 @@
 			}
 
 			processes = await response.json();
+			isLoading = false;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load processes';
 			console.error('Error loading processes:', err);
-		} finally {
-			isLoading = false;
+		}
+	}
+
+	function updateProcess(updatedProcess: Process) {
+		const index = processes.findIndex((p) => p.id === updatedProcess.id);
+		if (index !== -1) {
+			processes[index] = updatedProcess;
+			console.log(`Process ${updatedProcess.id} updated to: ${updatedProcess.status}`);
+
+			// Show toast when process completes
+			if (updatedProcess.status === 'completed') {
+				Toasts.add({
+					type: 'success',
+					message: `${updatedProcess.name} is ready for download!`
+				});
+			}
 		}
 	}
 
@@ -120,8 +136,18 @@
 		}
 	}
 
+	let unsubscribe: (() => void) | null = null;
+
 	onMount(() => {
 		loadProcesses();
+
+		processUpdatesStore.connect();
+		unsubscribe = processUpdatesStore.onProcessUpdate(updateProcess);
+	});
+
+	onDestroy(() => {
+		unsubscribe?.();
+		processUpdatesStore.disconnect();
 	});
 </script>
 
@@ -136,12 +162,8 @@
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Upload History</h1>
 		<div class="flex items-center space-x-3">
-			<Button
-				class="px-4 py-2 text-sm font-semibold"
-				variant="secondary"
-				onclick={loadProcesses}
-				disabled={isLoading}
-				loading={isLoading}>{isLoading ? 'Refreshing...' : 'Refresh'}</Button
+			<Button class="px-4 py-2 text-sm font-semibold" variant="secondary" onclick={loadProcesses} loading={isLoading}
+				>{isLoading ? 'Refreshing...' : 'Refresh'}</Button
 			>
 			<Button class="px-4 py-2 text-sm font-semibold" onclick={() => (showUploadModal = true)}>Upload</Button>
 		</div>
@@ -258,7 +280,7 @@
 				</div>
 			{:else}
 				<div class="space-y-3">
-					{#each processes as process}
+					{#each processes as process (process.id)}
 						<div
 							class="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 p-4 transition-colors duration-150 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-700/50 dark:hover:bg-zinc-700"
 						>
@@ -387,9 +409,16 @@
 
 		<div class="flex space-x-3 pt-2">
 			<Button variant="secondary" class="flex-1 px-4 py-2.5" onclick={closeModal} disabled={isUploading}>Cancel</Button>
-			<Button class="flex-1 px-4 py-2.5" onclick={upload} disabled={!file} loading={isUploading}
+			<!-- <Button class="flex-1 px-4 py-2.5" onclick={upload} disabled={isUploading || !file} loading={isUploading}
 				>{isUploading ? 'Uploading...' : 'Upload'}</Button
+			> -->
+			<button
+				class="flex-1 rounded-md bg-zinc-700 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-zinc-600 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-zinc-400 dark:bg-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-500 dark:focus:ring-offset-zinc-800 dark:disabled:bg-zinc-500"
+				onclick={upload}
+				disabled={isUploading || !file}
 			>
+				{isUploading ? 'Uploading...' : 'Upload'}
+			</button>
 		</div>
 	</div>
 </Modal>

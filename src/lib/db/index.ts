@@ -152,54 +152,37 @@ export class ProcessService {
 
 		return results[0] || null;
 	}
+
+	async updateStatus(id: string, status: ProcessStatus, outputs?: string): Promise<Process | null> {
+		const query = `
+			UPDATE processes 
+			SET 
+				status = $1,
+				outputs = COALESCE($2, outputs),
+				updated_at = NOW()
+			WHERE id = $3
+			RETURNING 
+				id, 
+				name, 
+				status, 
+				outputs, 
+				original_file_name, 
+				original_file_path, 
+				original_file_size, 
+				created_at, 
+				updated_at
+		`;
+
+		const results = await executeQuery<Process>(query, [status, outputs || null, id]);
+
+		const updatedProcess = results[0] || null;
+
+		if (updatedProcess) {
+			console.log(`Updated process ${id} to status: ${status}`);
+		}
+
+		return updatedProcess;
+	}
 }
 
 export const processService = new ProcessService();
-
-export const vttFiles = {
-	async getAll() {
-		const pool = await getPool();
-		const result = await pool.query('SELECT * FROM vtt_files ORDER BY created_at DESC');
-		return result.rows;
-	},
-
-	async getById(id: string) {
-		const pool = await getPool();
-		const result = await pool.query('SELECT * FROM vtt_files WHERE id = $1', [id]);
-		return result.rows[0] || null;
-	},
-
-	async create(
-		fileName: string,
-		originalFileName?: string,
-		originalFilePath?: string,
-		originalFileSize?: number
-	): Promise<string> {
-		const id = nanoid();
-		const query = `
-			INSERT INTO processes (
-				id, 
-				name, 
-				status,
-				original_file_name,
-				original_file_path,
-				original_file_size,
-				created_at,
-				updated_at
-			) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-			RETURNING id
-		`;
-
-		const params = [
-			id,
-			fileName,
-			'processing' as ProcessStatus,
-			originalFileName || null,
-			originalFilePath || null,
-			originalFileSize || null
-		];
-
-		await executeQuery(query, params);
-		return id;
-	}
-};
