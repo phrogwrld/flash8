@@ -57,7 +57,7 @@
 	{/if}
 
 	{#if children}
-		<span>
+		<span class="inline-flex items-center gap-2">
 			{@render children()}
 		</span>
 	{/if}

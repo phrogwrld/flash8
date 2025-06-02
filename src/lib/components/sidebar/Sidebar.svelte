@@ -5,7 +5,6 @@
 		<a href="/" class="text-lg font-bold text-zinc-900 dark:text-zinc-100">Flash 8</a>
 	</div>
 	<nav class="flex flex-col p-4">
-		<a href="/" class="mb-2 text-zinc-900 dark:text-zinc-100">Upload</a>
-		<a href="/jobs" class="mb-2 text-zinc-900 dark:text-zinc-100">Jobs</a>
+		<a href="/" class="mb-2 text-zinc-900 dark:text-zinc-100">Home</a>
 	</nav>
 </div>
