@@ -58,6 +58,12 @@
 					fileName: updatedProcess.name,
 					message: `${updatedProcess.name} is ready for download!`
 				});
+			} else if (updatedProcess.status === 'failed') {
+				Toasts.add({
+					type: 'failed',
+					fileName: updatedProcess.name,
+					message: `Processing of ${updatedProcess.name} failed. Please try again.`
+				});
 			}
 		}
 	}
@@ -167,13 +173,6 @@
 		processUpdatesStore.disconnect();
 	});
 </script>
-
-<button
-	onclick={() => Toasts.add({ fileName: 'Testing1', type: 'uploading' })}
-	class="fixed rounded-md bg-blue-500 px-4 py-2 text-white shadow-lg"
->
-	Show Toast
-</button>
 
 <div class="mx-auto w-full space-y-6">
 	<div class="flex items-center justify-between">
