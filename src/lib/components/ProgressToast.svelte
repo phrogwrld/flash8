@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 	import { Toasts } from '$lib/state/toasts.svelte';
 
 	type Toast = {
 		id: string;
-		type: 'info' | 'success' | 'error' | 'progress';
+		type: 'uploading' | 'processing' | 'completed' | 'failed';
 		message?: string;
 		fileName?: string;
 		progress?: number;
-		timeLeft?: number;
+		duration?: number;
 	};
 
 	let { toast }: { toast: Toast } = $props();
@@ -17,135 +17,143 @@
 		Toasts.remove(toast.id);
 	}
 
-	function getTitle() {
+	let countdownWidth = $state(100);
+	let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+	$effect(() => {
+		if (toast.type === 'completed' || toast.type === 'failed') {
+			countdownWidth = 100;
+
+			const duration = toast.type === 'completed' ? 4000 : 5000;
+			const intervalTime = 50;
+			const decrement = (100 / duration) * intervalTime;
+
+			countdownInterval = setInterval(() => {
+				countdownWidth -= decrement;
+				if (countdownWidth <= 0) {
+					if (countdownInterval) {
+						clearInterval(countdownInterval);
+					}
+				}
+			}, intervalTime);
+		} else {
+			if (countdownInterval) {
+				clearInterval(countdownInterval);
+				countdownInterval = null;
+			}
+		}
+
+		return () => {
+			if (countdownInterval) {
+				clearInterval(countdownInterval);
+			}
+		};
+	});
+
+	function getStatusInfo() {
 		switch (toast.type) {
-			case 'progress':
-				return `Uploading ${toast.fileName}`;
-			case 'success':
-				return 'Upload Complete';
-			case 'error':
-				return 'Upload Failed';
-			default:
-				return 'Upload Status';
+			case 'uploading':
+				return {
+					text: `Uploading ${toast.fileName}`,
+					showDots: true,
+					bgClass: 'bg-white dark:bg-zinc-800',
+					textClass: 'text-zinc-700 dark:text-zinc-300',
+					borderClass: 'border-zinc-200 dark:border-zinc-700',
+					progressClass: 'bg-blue-500'
+				};
+			case 'processing':
+				return {
+					text: `Processing ${toast.fileName}`,
+					showDots: true,
+					bgClass: 'bg-white dark:bg-zinc-800',
+					textClass: 'text-zinc-700 dark:text-zinc-300',
+					borderClass: 'border-zinc-200 dark:border-zinc-700',
+					progressClass: 'bg-zinc-400'
+				};
+			case 'completed':
+				return {
+					text: `${toast.fileName} completed!`,
+					showDots: false,
+					bgClass: 'bg-white dark:bg-zinc-800',
+					textClass: 'text-green-700 dark:text-green-300',
+					borderClass: 'border-green-200 dark:border-green-700',
+					progressClass: 'bg-green-500'
+				};
+			case 'failed':
+				return {
+					text: `${toast.fileName} failed`,
+					showDots: false,
+					bgClass: 'bg-white dark:bg-zinc-800',
+					textClass: 'text-red-700 dark:text-red-300',
+					borderClass: 'border-red-200 dark:border-red-700',
+					progressClass: 'bg-red-500'
+				};
 		}
 	}
 
-	function getProgressText() {
-		if (toast.type === 'success') return '100% · Complete';
-		if (toast.type === 'error') return 'Failed';
-
-		const percent = toast.progress || 0;
-		const timeText = toast.timeLeft ? ` · ${toast.timeLeft} seconds left` : '';
-		return `${percent}%${timeText}`;
-	}
-
-	function getIcon() {
-		switch (toast.type) {
-			case 'success':
-				return `<svg class="shrink-0 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>`;
-			case 'error':
-				return `<svg class="shrink-0 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>`;
-			default:
-				return `<svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                    <path d="M12 12v9"></path>
-                    <path d="m16 16-4-4-4 4"></path>
-                </svg>`;
-		}
-	}
-
-	function getProgressBarColor() {
-		switch (toast.type) {
-			case 'success':
-				return 'bg-green-600';
-			case 'error':
-				return 'bg-red-600';
-			default:
-				return 'bg-blue-600';
-		}
-	}
-
-	let progressPercent = $derived(toast.progress || 0);
+	let statusInfo = $derived(getStatusInfo());
 </script>
 
 <div
-	class="relative max-w-xs rounded-xl border border-gray-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-	role="alert"
-	tabindex="-1"
-	in:fly={{ y: 200, duration: 500, delay: 50 }}
-	out:fly={{ y: 100, duration: 300 }}
+	class="relative w-80 max-w-sm {statusInfo.bgClass} {statusInfo.borderClass} overflow-hidden rounded-2xl border shadow-lg"
+	in:fly={{ x: 400, duration: 300, delay: 100 }}
+	out:fade={{ duration: 200 }}
 >
-	<div class="flex gap-x-3 p-4">
-		<div class="shrink-0">
-			<!-- Icon -->
-			<span
-				class="m-1 inline-flex size-8 items-center justify-center rounded-full bg-gray-100 text-gray-800 dark:bg-neutral-700 dark:text-neutral-200"
-			>
-				{@html getIcon()}
-			</span>
-
-			<!-- Close Button -->
-			<button
-				type="button"
-				class="absolute end-3 top-3 inline-flex size-5 shrink-0 items-center justify-center rounded-lg text-gray-800 opacity-50 hover:opacity-100 focus:opacity-100 focus:outline-hidden dark:text-white"
-				aria-label="Close"
-				onclick={dismiss}
-			>
-				<span class="sr-only">Close</span>
-				<svg
-					class="size-4 shrink-0"
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path d="M18 6 6 18"></path>
-					<path d="m6 6 12 12"></path>
-				</svg>
-			</button>
+	<div class="flex items-center gap-3 p-4">
+		<div class="flex-shrink-0">
+			{#if toast.type === 'uploading'}
+				<div class="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
+			{:else if toast.type === 'processing'}
+				<div class="h-2 w-2 animate-pulse rounded-full bg-zinc-400"></div>
+			{:else if toast.type === 'completed'}
+				<div class="h-2 w-2 rounded-full bg-green-500"></div>
+			{:else if toast.type === 'failed'}
+				<div class="h-2 w-2 rounded-full bg-red-500"></div>
+			{/if}
 		</div>
 
-		<div class="me-5 grow">
-			<h3 class="text-sm font-medium text-gray-800 dark:text-white">
-				{getTitle()}
-			</h3>
-
-			<!-- Progress -->
-			<div class="mt-2 flex flex-col gap-x-3">
-				<span class="mb-1.5 block text-xs text-gray-500 dark:text-neutral-400">
-					{getProgressText()}
-				</span>
-
-				{#if toast.type !== 'error'}
-					<div
-						class="flex h-1 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-700"
-						role="progressbar"
-						aria-valuenow={progressPercent}
-						aria-valuemin="0"
-						aria-valuemax="100"
-					>
-						<div
-							class="flex flex-col justify-center overflow-hidden {getProgressBarColor()} text-center text-xs whitespace-nowrap text-white transition-all duration-300"
-							style="width: {progressPercent}%"
-						></div>
-					</div>
+		<div class="min-w-0 flex-1">
+			<p class="text-sm font-medium {statusInfo.textClass} truncate">
+				{statusInfo.text}
+				{#if statusInfo.showDots}
+					<span class="inline-flex">
+						<span class="animate-pulse" style="animation-delay: 0s">.</span>
+						<span class="animate-pulse" style="animation-delay: 0.2s">.</span>
+						<span class="animate-pulse" style="animation-delay: 0.4s">.</span>
+					</span>
 				{/if}
+			</p>
+		</div>
 
-				{#if toast.message}
-					<p class="mt-1 text-xs text-gray-600 dark:text-neutral-300">
-						{toast.message}
-					</p>
-				{/if}
+		<button
+			type="button"
+			class="flex-shrink-0 rounded-md p-1 opacity-60 transition-colors hover:bg-zinc-100 hover:opacity-100 dark:hover:bg-zinc-700"
+			onclick={dismiss}
+			aria-label="Close notification"
+		>
+			<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>
+	</div>
+
+	{#if toast.type === 'uploading' && typeof toast.progress === 'number'}
+		<div class="px-4 pb-3">
+			<div class="h-0.5 w-full rounded-full bg-zinc-200 dark:bg-zinc-700">
+				<div
+					class="h-0.5 rounded-full {statusInfo.progressClass} transition-all duration-300"
+					style="width: {toast.progress}%"
+				></div>
 			</div>
 		</div>
-	</div>
+	{/if}
+
+	{#if (toast.type === 'completed' || toast.type === 'failed') && countdownWidth > 0}
+		<div class="absolute bottom-0 left-0 h-0.5 w-full bg-zinc-200 dark:bg-zinc-700">
+			<div
+				class="h-full {statusInfo.progressClass} transition-all duration-75 ease-linear"
+				style="width: {countdownWidth}%"
+			></div>
+		</div>
+	{/if}
 </div>

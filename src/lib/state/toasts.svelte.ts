@@ -1,7 +1,8 @@
 type Toast = {
 	id: string;
-	type: 'info' | 'success' | 'error' | 'progress';
+	type: 'uploading' | 'processing' | 'completed' | 'failed';
 	message?: string;
+	fileName?: string;
 	progress?: number;
 	duration?: number;
 };
@@ -14,7 +15,7 @@ class ToastsBase {
 		const newToast: Toast = { id, ...toast };
 		this.values.push(newToast);
 
-		if (toast.type !== 'progress') {
+		if (toast.type !== 'uploading' && toast.type !== 'processing') {
 			setTimeout(() => {
 				this.remove(id);
 			}, 5000);

@@ -54,7 +54,8 @@
 			// Show toast when process completes
 			if (updatedProcess.status === 'completed') {
 				Toasts.add({
-					type: 'success',
+					type: 'completed',
+					fileName: updatedProcess.name,
 					message: `${updatedProcess.name} is ready for download!`
 				});
 			}
@@ -76,6 +77,12 @@
 		}
 
 		try {
+			Toasts.add({
+				type: 'uploading',
+				fileName: validatedData.data.file.name,
+				message: `Uploading ${validatedData.data.file.name}`
+			});
+
 			isUploading = true;
 			const formData = new FormData();
 
@@ -110,6 +117,11 @@
 				fileInputElement.value = '';
 			}
 
+			Toasts.add({
+				type: 'processing',
+				fileName: result.name
+			});
+
 			// Refresh the files list
 			await loadProcesses();
 
@@ -123,6 +135,11 @@
 			if (!uploadMessage) {
 				uploadMessage = 'Upload failed. Please try again.';
 			}
+			Toasts.add({
+				type: 'failed',
+				fileName: uploadName || 'Unknown file',
+				message: uploadMessage || 'Upload failed. Please try again.'
+			});
 		}
 	}
 
@@ -152,7 +169,7 @@
 </script>
 
 <button
-	onclick={() => Toasts.add({ message: 'This is a toast message!', type: 'progress' })}
+	onclick={() => Toasts.add({ fileName: 'Testing1', type: 'uploading' })}
 	class="fixed rounded-md bg-blue-500 px-4 py-2 text-white shadow-lg"
 >
 	Show Toast
